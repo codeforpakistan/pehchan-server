@@ -26,4 +26,7 @@ hydra/*-packr.go
 hydra/packrd/
 hydra/persistence/sql/migrations/schema.sql
 
+.DS_Store
 oauth2_client/node_modules
+__pycache__
+env

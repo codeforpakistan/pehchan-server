@@ -30,6 +30,18 @@ const config = {
   admin: process.env.ADMIN_URL || 'https://hydra-admin.pehchaan.kpgov.tech',
   port: parseInt(process.env.PORT) || 3000
 }
+const credentials = {
+  client: {
+    id: 'pehchan',
+    secret: 'pehchan1'
+  },
+  auth: {
+    tokenHost: config.public,
+    authorizeHost: config.url,
+    tokenPath: '/oauth2/token',
+    authorizePath: '/oauth2/auth'
+  }
+}
 
 const redirect_uri = `https://oauth.pehchaan.kpgov.tech`
 
@@ -79,20 +91,8 @@ const nc = (req) =>
   })
 
 app.get('/oauth2/code', async (req, res) => {
-  const credentials = {
-    client: {
-      id: req.query.client_id || 'pehchan',
-      secret: req.query.client_secret || 'pehchan1'
-    },
-    auth: {
-      tokenHost: config.public,
-      authorizeHost: config.url,
-      tokenPath: '/oauth2/token',
-      authorizePath: '/oauth2/auth'
-    }
-  }
+  
   console.log('credentials', credentials);
-
   const state = uuid.v4()
   const scope = req.query.scope || 'openid offline photos.read'
 
@@ -125,12 +125,13 @@ app.get('/callback', async (req, res) => {
     res.send(JSON.stringify({ result: 'error', error: 'no code given' }))
     return
   }
-
+  let scopetoUse = 'openid offline photos.read';
+  scopetoUse = scopetoUse.split(' ');
   oauth2
-    .create(req.session.credentials)
+    .create(credentials)
     .authorizationCode.getToken({
       redirect_uri: `${redirect_uri}/callback`,
-      scope: req.session.scope,
+      scope: scopetoUse,
       code: req.query.code
     })
     .then((token) => {

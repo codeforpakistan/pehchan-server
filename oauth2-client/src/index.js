@@ -10,6 +10,7 @@ const { URLSearchParams } = require('url')
 const bodyParser = require('body-parser')
 const jwksClient = require('jwks-rsa')
 const jwt = require('jsonwebtoken')
+const cookieParser = require('cookie-parser');
 
 const app = express()
 
@@ -28,8 +29,14 @@ const config = {
   url: process.env.AUTHORIZATION_SERVER_URL || 'https://hydra-public.pehchaan.kpgov.tech',
   public: process.env.PUBLIC_URL || 'https://hydra-public.pehchaan.kpgov.tech',
   admin: process.env.ADMIN_URL || 'https://hydra-admin.pehchaan.kpgov.tech',
+  // url: process.env.AUTHORIZATION_SERVER_URL || 'http://localhost:9000',
+  // public: process.env.PUBLIC_URL || 'http://localhost:9000',
+  // admin: process.env.ADMIN_URL || 'http://localhost:9001',
   port: parseInt(process.env.PORT) || 3000
 }
+
+app.use(cookieParser());
+
 const credentials = {
   client: {
     id: 'pehchan',
@@ -43,6 +50,7 @@ const credentials = {
   }
 }
 
+// const redirect_uri = `http://127.0.0.1:3000`
 const redirect_uri = `https://oauth.pehchaan.kpgov.tech`
 
 app.use(
@@ -61,7 +69,7 @@ app.use(
     resave: false,
     saveUninitialized: true,
     cookie: {
-      secure: true,
+      secure: false,
       httpOnly: false
     }
   })
@@ -136,6 +144,7 @@ app.get('/callback', async (req, res) => {
     })
     .then((token) => {
       req.session.oauth2_flow = { token } // code returns {access_token} because why not...
+      // return res.redirect("http://localhost:8080/authenticate/"+token.access_token);
       res.send({ result: 'success', token })
     })
     .catch((err) => {
@@ -201,20 +210,25 @@ app.get('/oauth2/validate-jwt', (req, res) => {
 })
 
 app.get('/oauth2/introspect/at', (req, res) => {
-  const params = new URLSearchParams()
-  params.append('token', req.session.oauth2_flow.token.access_token)
-
-  fetch(new URL('/oauth2/introspect', config.admin).toString(), {
-    method: 'POST',
-    body: params
-  })
-    .then(isStatusOk)
-    .then((res) => res.json())
-    .then((body) => res.json({ result: 'success', body }))
-    .catch((err) => {
-      console.error(err)
-      res.send(JSON.stringify({ error: err.toString() }))
+  try {
+    const params = new URLSearchParams()
+    console.log('req.session.oauth2_flow', req.session.oauth2_flow);
+    params.append('token', req.session.oauth2_flow.token.access_token)
+  
+    fetch(new URL('/oauth2/introspect', config.admin).toString(), {
+      method: 'POST',
+      body: params
     })
+      .then(isStatusOk)
+      .then((res) => res.json())
+      .then((body) => res.json({ result: 'success',  body: body, token: req.session.oauth2_flow.token }))
+      .catch((err) => {
+        console.error(err)
+        res.send(JSON.stringify({ error: err.toString() }))
+      })
+  } catch(err) {
+    res.json({result: 'failure', status: 'no Session'});
+  }
 })
 
 app.get('/oauth2/introspect/rt', async (req, res) => {

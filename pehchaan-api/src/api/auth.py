@@ -17,7 +17,7 @@ auth_blueprint = Blueprint('auth', __name__)
 api = Api(auth_blueprint)
 
 # Connecting with hydra
-configuration = ory_hydra_client.Configuration(host="http://host.docker.internal:4445")
+configuration = ory_hydra_client.Configuration(host="https://hydra-admin.pehchaan.kpgov.tech")
 
 
 # from requests import get, post

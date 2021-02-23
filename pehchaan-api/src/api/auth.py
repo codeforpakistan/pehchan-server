@@ -91,12 +91,15 @@ class Consent(Resource):
         post_data = request.get_json()
         consent_challenge = post_data.get('consent_challenge', None)
         requested_scope = post_data.get('requested_scope', [])
+        nic = post_data.get('nic', None)
         remember = post_data.get('remember', False)
         
         if consent_challenge is None:
             return {"msg": "Invalid request, missing challenge from hydra!"}, 401
 
-        user = User.query.filter_by(nic='1730187464751').first()
+        user = User.query.filter_by(nic=nic).first()
+        if user is None:
+            return {"msg": "NIC not registered!"}, 404
         session = {
             "access_token": {},
             "id_token": {

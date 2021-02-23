@@ -42,7 +42,6 @@ class UsersList(Resource):
         return User.query.all(), 200
 
     @api.expect(user, validate=True)
-    @jwt_required
     def post(self):
         post_data = request.get_json()
         nic = post_data.get('nic')

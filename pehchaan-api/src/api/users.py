@@ -4,6 +4,10 @@ from flask_jwt_extended import (
     JWTManager, jwt_required, create_access_token,
     get_jwt_identity
 )
+
+import ory_hydra_client
+from ory_hydra_client.rest import ApiException
+
 from src import db
 from src import jwt
 from src.api.models import User
@@ -11,6 +15,10 @@ from src.api.models import User
 
 users_blueprint = Blueprint('users', __name__)
 api = Api(users_blueprint)
+
+# Connecting with hydra
+configuration = ory_hydra_client.Configuration(host="https://hydra-admin.pehchaan.kpgov.tech")
+
 
 user = api.model('User', {
     'id': fields.Integer(readOnly=True),
@@ -49,7 +57,11 @@ class UsersList(Resource):
         email = post_data.get('email')
         phone = post_data.get('phone')
         password = post_data.get('password')
+        challenge = post_data.get('login_challenge', None)
         response_object = {}
+
+        if challenge is None:
+            return {'message': 'Invalid or missing challenge!'}, 400
 
         user = User.query.filter_by(nic=nic).first()
         if user:
@@ -65,6 +77,19 @@ class UsersList(Resource):
         db.session.commit()
 
         response_object['message'] = f'{nic} was added!'
+        with ory_hydra_client.ApiClient(configuration) as api_client:
+            hydra = ory_hydra_client.AdminApi(api_client)
+            login_request = hydra.get_login_request(challenge)
+        
+        # Our subject is NIC!
+        subject = nic
+        body = ory_hydra_client.AcceptLoginRequest(
+            subject=subject, remember=remember
+        )
+        response = hydra.accept_login_request(
+            login_request.challenge, body=body
+        )
+        response_object['redirect_to'] = response.redirect_to
         return response_object, 201
 
 

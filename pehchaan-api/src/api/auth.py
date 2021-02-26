@@ -96,8 +96,8 @@ class Consent(Resource):
         
         if consent_challenge is None:
             return {"msg": "Invalid request, missing challenge from hydra!"}, 401
-
-        user = User.query.filter_by(nic=nic).first()
+        print(nic)
+        user = User.query.filter_by(nic='123').first()
         if user is None:
             return {"msg": "NIC not registered!"}, 404
         session = {

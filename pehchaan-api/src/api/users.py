@@ -58,6 +58,7 @@ class UsersList(Resource):
         phone = post_data.get('phone')
         password = post_data.get('password')
         challenge = post_data.get('login_challenge', None)
+        remember = post_data.get('remember', False)
         response_object = {}
 
         if challenge is None:

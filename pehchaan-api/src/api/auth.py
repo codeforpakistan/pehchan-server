@@ -49,6 +49,8 @@ class Login(Resource):
     def post(self):
         post_data = request.get_json()
         nic = post_data.get('nic', None)
+        if nic is not None:
+            nic = nic.replace('-', '')
         password = post_data.get('password', None)
         remember = post_data.get('remember', False)
         challenge = post_data.get('login_challenge', None)
@@ -97,7 +99,7 @@ class Consent(Resource):
         if consent_challenge is None:
             return {"msg": "Invalid request, missing challenge from hydra!"}, 401
         print(nic)
-        user = User.query.filter_by(nic='123').first()
+        user = User.query.filter_by(nic=nic).first()
         if user is None:
             return {"msg": "NIC not registered!"}, 404
         session = {

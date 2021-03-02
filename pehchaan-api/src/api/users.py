@@ -45,7 +45,6 @@ class Users(Resource):
 class UsersList(Resource):
     
     @api.marshal_with(user, as_list=True)
-    @jwt_required
     def get(self):
         return User.query.all(), 200
 

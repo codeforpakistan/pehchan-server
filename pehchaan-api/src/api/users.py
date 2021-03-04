@@ -47,6 +47,9 @@ class Users(Resource):
             api.abort(404, f"User {user_id} does not exist")
         db.session.delete(user)
         db.session.commit()
+        return {
+            'success': True
+        }, 201
 
 
 class UsersList(Resource):

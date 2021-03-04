@@ -34,7 +34,6 @@ user = api.model('User', {
 class Users(Resource):
 
     @api.marshal_with(user)
-    @jwt_required
     def get(self, user_id):
         user = User.query.filter_by(id=user_id).first()
         if not user:

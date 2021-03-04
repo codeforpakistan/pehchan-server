@@ -41,6 +41,13 @@ class Users(Resource):
             api.abort(404, f"User {user_id} does not exist")
         return user, 200
 
+    def delete(self, user_id):
+        user = User.query.filter_by(id=user_id).first()
+        if not user:
+            api.abort(404, f"User {user_id} does not exist")
+        db.session.delete(user)
+        db.session.commit()
+
 
 class UsersList(Resource):
     

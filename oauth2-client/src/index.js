@@ -25,13 +25,13 @@ const isStatusOk = (res) =>
       )
 
 const config = {
-  url: process.env.AUTHORIZATION_SERVER_URL || 'http://localhost:9000',
-  public: process.env.PUBLIC_URL || 'http://localhost:9000',
-  admin: process.env.ADMIN_URL || 'http://localhost:9001',
+  url: process.env.AUTHORIZATION_SERVER_URL || 'https://hydra-public.pehchaan.kpgov.tech',
+  public: process.env.PUBLIC_URL || 'https://hydra-public.pehchaan.kpgov.tech',
+  admin: process.env.ADMIN_URL || 'https://hydra-admin.pehchaan.kpgov.tech',
   port: parseInt(process.env.PORT) || 3000
 }
 
-const redirect_uri = `http://127.0.0.1:${config.port}`
+const redirect_uri = `https://oauth.pehchaan.kpgov.tech`
 
 app.use(
   ew.logger({
@@ -81,8 +81,8 @@ const nc = (req) =>
 app.get('/oauth2/code', async (req, res) => {
   const credentials = {
     client: {
-      id: req.query.client_id || 'test-back1',
-      secret: req.query.client_secret || 'myclient1'
+      id: req.query.client_id || 'pehchan',
+      secret: req.query.client_secret || 'pehchan1'
     },
     auth: {
       tokenHost: config.public,

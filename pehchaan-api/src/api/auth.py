@@ -130,6 +130,55 @@ class Consent(Resource):
         }, 200
 
 
+class ConsentSkip(Resource):
+
+    def post(self):
+        post_data = request.get_json()
+        consent_challenge = post_data.get('consent_challenge', None)
+        nic = post_data.get('nic', None)
+        
+        if consent_challenge is None:
+            return {"msg": "Invalid request, missing challenge from hydra!"}, 401
+        
+        user = User.query.filter_by(nic=nic).first()
+        if user is None:
+            return {"msg": "NIC not registered!"}, 404
+        
+        session = {
+            "access_token": {},
+            "id_token": {
+                "sub": "248289761001",
+                "name": user.name,
+                "preferred_username": user.email,
+                "email": user.email,
+                "picture": "",
+            },
+        }
+
+        with ory_hydra_client.ApiClient(configuration) as api_client:
+            hydra = ory_hydra_client.AdminApi(api_client)
+            consent_request = hydra.get_consent_request(consent_challenge)
+
+            if consent_request.skip:
+                body = ory_hydra_client.AcceptConsentRequest(
+                    grant_scope=consent_request.requested_scope,
+                    grant_access_token_audience=consent_request.requested_access_token_audience,
+                    session=session,
+                )
+                response = hydra.accept_consent_request(
+                    consent_request.challenge, body=body
+                )
+                return {
+                    'skip': True,
+                    'redirect_to': response.redirect_to
+                }, 200
+        
+        return {
+            'skip': False
+        }, 200
+
+
 api.add_resource(Auth, '/authenticate')
 api.add_resource(Login, '/loginn')
 api.add_resource(Consent, '/consentt')
+api.add_resource(ConsentSkip, '/consent_skip')

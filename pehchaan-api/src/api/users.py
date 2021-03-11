@@ -44,6 +44,15 @@ class Users(Resource):
         user = User.query.filter_by(id=user_id).first()
         if not user:
             api.abort(404, f"User {user_id} does not exist")
+
+        subject = user.nic
+        with ory_hydra_client.ApiClient(configuration) as api_client:
+            hydra = ory_hydra_client.AdminApi(api_client)
+            try:
+                # Revokes Consent Sessions of a Subject for a Specific OAuth 2.0 Client
+                hydra.revoke_consent_sessions(subject, all=True)
+            except ory_hydra_client.ApiException as e:
+                print("Exception when calling AdminApi->revoke_consent_sessions: %s\n" % e)
         db.session.delete(user)
         db.session.commit()
         return {

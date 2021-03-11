@@ -50,7 +50,7 @@ class Users(Resource):
             hydra = ory_hydra_client.AdminApi(api_client)
             try:
                 # Revokes Consent Sessions of a Subject for a Specific OAuth 2.0 Client
-                hydra.revoke_consent_sessions(subject, all=True)
+                hydra.revoke_consent_sessions(subject)
             except ory_hydra_client.ApiException as e:
                 print("Exception when calling AdminApi->revoke_consent_sessions: %s\n" % e)
         db.session.delete(user)

@@ -182,7 +182,6 @@ class Introspection(Resource):
 
     def get(self, token_str, scopes):
         
-        print(token_str, scopes)
         with ory_hydra_client.ApiClient(configuration) as api_client:
             hydra = ory_hydra_client.AdminApi(api_client)
             try:

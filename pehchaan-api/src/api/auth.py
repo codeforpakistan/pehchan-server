@@ -186,10 +186,12 @@ class Introspection(Resource):
         with ory_hydra_client.ApiClient(configuration) as api_client:
             hydra = ory_hydra_client.AdminApi(api_client)
             try:
-                # Revokes Consent Sessions of a Subject for a Specific OAuth 2.0 Client
-                resp = hydra.introspect_o_auth2_token(token_str, scope=scopes)
+                if scopes.lower() == 'na':
+                    resp = hydra.introspect_o_auth2_token(token_str)
+                else:
+                    resp = hydra.introspect_o_auth2_token(token_str, scope=scopes)
             except ory_hydra_client.ApiException as e:
-                print("Exception when calling AdminApi->revoke_consent_sessions: %s\n" % e)
+                print("Exception when calling AdminApi->introspect_o_auth2_token: %s\n" % e)
         
         return {
             'active': resp.active

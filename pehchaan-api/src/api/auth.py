@@ -178,7 +178,26 @@ class ConsentSkip(Resource):
         }, 200
 
 
+class Introspection(Resource):
+
+    def get(self, token_str, scopes):
+        
+        print(token_str, scopes)
+        with ory_hydra_client.ApiClient(configuration) as api_client:
+            hydra = ory_hydra_client.AdminApi(api_client)
+            try:
+                # Revokes Consent Sessions of a Subject for a Specific OAuth 2.0 Client
+                resp = hydra.introspect_o_auth2_token(token_str, scope=scopes)
+            except ory_hydra_client.ApiException as e:
+                print("Exception when calling AdminApi->revoke_consent_sessions: %s\n" % e)
+        
+        return {
+            'active': resp.active
+        }, 200
+
+
 api.add_resource(Auth, '/authenticate')
 api.add_resource(Login, '/loginn')
 api.add_resource(Consent, '/consentt')
 api.add_resource(ConsentSkip, '/consent_skip')
+api.add_resource(Introspection, '/introspection/<token_str>/<scopes>')

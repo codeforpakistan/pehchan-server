@@ -343,6 +343,10 @@ app.get('/callback', async (req, res) => {
     })
 })
 
+app.get('/cancel-auth', async (req, res) => {
+  res.send({ result: 'close the browser' });
+})
+
 app.get('/openid/userinfo', async (req, res) => {
   const client = await nc(req)
   client

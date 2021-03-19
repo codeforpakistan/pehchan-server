@@ -182,7 +182,12 @@ class Introspection(Resource):
 
     def get(self, token_str, scopes):
         
-        print(token_str, scopes)
+        # Check if token and scopes is send via headers
+        headers = request.headers
+        if headers.get('Token') is not None:
+            token_str = headers.get('Token', '')
+            scopes = headers.get('Scopes', 'na')
+        
         with ory_hydra_client.ApiClient(configuration) as api_client:
             hydra = ory_hydra_client.AdminApi(api_client)
             try:

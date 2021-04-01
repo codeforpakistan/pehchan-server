@@ -210,7 +210,11 @@ class RefreshToken(Resource):
     def post(self):
         post_data = request.get_json()
         
-        with ory_hydra_client.ApiClient(configuration) as api_client:
+        configuration_public = ory_hydra_client.Configuration(
+            host="https://hydra-public.pehchaan.kpgov.tech"
+        )
+
+        with ory_hydra_client.ApiClient(configuration_public) as api_client:
             # Create an instance of the API class
             api_instance = public_api.PublicApi(api_client)
             grant_type = post_data.get('grant_type', '')

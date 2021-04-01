@@ -211,8 +211,11 @@ class RefreshToken(Resource):
         post_data = request.get_json()
         
         configuration_public = ory_hydra_client.Configuration(
-            host="https://hydra-public.pehchaan.kpgov.tech"
+            host="https://hydra-public.pehchaan.kpgov.tech",
+            username = 'pehchan',
+            password = 'pehchan1'
         )
+        #configuration_public.access_token = post_data.get('access_token', '')
 
         with ory_hydra_client.ApiClient(configuration_public) as api_client:
             # Create an instance of the API class
@@ -222,14 +225,22 @@ class RefreshToken(Resource):
             refresh_token = post_data.get('refresh_token', '')
             redirect_uri = post_data.get('redirect_uri', '')
             client_id = post_data.get('client_id', '')
-
-
+            print(client_id, redirect_uri, grant_type)
             # example passing only required values which don't have defaults set
             # and optional values
             try:
                 # The OAuth 2.0 Token Endpoint
-                api_response = api_instance.oauth2_token(grant_type, code=code, refresh_token=refresh_token, redirect_uri=redirect_uri, client_id=client_id)
-                pprint(api_response)
+                api_response = api_instance.oauth2_token(grant_type, refresh_token=refresh_token, redirect_uri=redirect_uri, client_id=client_id)
+                return {
+                    'result': 'success',
+                    'token': {
+                        'access_token': api_response.access_token,
+                        'id_token': api_response.id_token,
+                        'refresh_token': api_response.refresh_token,
+                        'scope': api_response.scope,
+                        'token_type': api_response.token_type
+                    }         
+                }, 200
             except ory_hydra_client.ApiException as e:
                 print("Exception when calling PublicApi->oauth2_token: %s\n" % e)
         

@@ -8,8 +8,6 @@ from flask_jwt_extended import (
 import ory_hydra_client
 from ory_hydra_client.api import public_api
 from ory_hydra_client.rest import ApiException
-from ory_hydra_client.model.oauth2_token_response import Oauth2TokenResponse
-from ory_hydra_client.model.generic_error import GenericError
 from pprint import pprint
 
 from src import db

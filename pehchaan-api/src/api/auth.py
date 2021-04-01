@@ -6,7 +6,11 @@ from flask_jwt_extended import (
 )
 
 import ory_hydra_client
+from ory_hydra_client.api import public_api
 from ory_hydra_client.rest import ApiException
+from ory_hydra_client.model.oauth2_token_response import Oauth2TokenResponse
+from ory_hydra_client.model.generic_error import GenericError
+from pprint import pprint
 
 from src import db
 from src import jwt
@@ -203,8 +207,38 @@ class Introspection(Resource):
         }, 200
 
 
+class RefreshToken(Resource):
+
+    def post(self):
+        post_data = request.get_json()
+        
+        with ory_hydra_client.ApiClient(configuration) as api_client:
+            # Create an instance of the API class
+            api_instance = public_api.PublicApi(api_client)
+            grant_type = post_data.get('grant_type', '')
+            code = post_data.get('code', '')
+            refresh_token = post_data.get('refresh_token', '')
+            redirect_uri = post_data.get('redirect_uri', '')
+            client_id = post_data.get('client_id', '')
+
+
+            # example passing only required values which don't have defaults set
+            # and optional values
+            try:
+                # The OAuth 2.0 Token Endpoint
+                api_response = api_instance.oauth2_token(grant_type, code=code, refresh_token=refresh_token, redirect_uri=redirect_uri, client_id=client_id)
+                pprint(api_response)
+            except ory_hydra_client.ApiException as e:
+                print("Exception when calling PublicApi->oauth2_token: %s\n" % e)
+        
+        return {
+            'success': False
+        }, 200
+
+
 api.add_resource(Auth, '/authenticate')
 api.add_resource(Login, '/loginn')
 api.add_resource(Consent, '/consentt')
 api.add_resource(ConsentSkip, '/consent_skip')
 api.add_resource(Introspection, '/introspection/<token_str>/<scopes>')
+api.add_resource(RefreshToken, '/refresh_token')

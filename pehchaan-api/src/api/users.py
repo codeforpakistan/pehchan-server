@@ -59,6 +59,22 @@ class Users(Resource):
             'success': True
         }, 201
 
+    def put(self, user_id):
+        user = User.query.filter_by(id=user_id).first()
+        if not user:
+            api.abort(404, f"User {user_id} does not exist")
+
+        # get payload
+        post_data = request.get_json()
+        if post_data.get('password') is None:
+            api.abort(400, f"Invalid or missing password")
+
+        user.password = post_data.get('password', '')
+        db.session.commit()
+        return {
+            'success': True
+        }, 201
+
 
 class UsersList(Resource):
     

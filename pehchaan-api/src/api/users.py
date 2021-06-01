@@ -34,14 +34,26 @@ user = api.model('User', {
 class Users(Resource):
 
     @api.marshal_with(user)
-    def get(self, user_id):
-        user = User.query.filter_by(id=user_id).first()
+    def get(self, id_type,user_id):
+        if id_type == 'id':
+            user = User.query.filter_by(id=user_id).first()
+        elif id_type == 'nic':
+            user = User.query.filter_by(nic=user_id).first()
+        else:
+            api.abort(400, f"Invalid request")
+
         if not user:
             api.abort(404, f"User {user_id} does not exist")
         return user, 200
 
-    def delete(self, user_id):
-        user = User.query.filter_by(id=user_id).first()
+    def delete(self, id_type, user_id):
+        if id_type == 'id':
+            user = User.query.filter_by(id=user_id).first()
+        elif id_type == 'nic':
+            user = User.query.filter_by(nic=user_id).first()
+        else:
+            api.abort(400, f"Invalid request")
+        
         if not user:
             api.abort(404, f"User {user_id} does not exist")
 
@@ -59,8 +71,14 @@ class Users(Resource):
             'success': True
         }, 201
 
-    def put(self, user_id):
-        user = User.query.filter_by(id=user_id).first()
+    def put(self, id_type, user_id):
+        if id_type == 'id':
+            user = User.query.filter_by(id=user_id).first()
+        elif id_type == 'nic':
+            user = User.query.filter_by(nic=user_id).first()
+        else:
+            api.abort(400, f"Invalid request")
+        
         if not user:
             api.abort(404, f"User {user_id} does not exist")
 
@@ -128,4 +146,4 @@ class UsersList(Resource):
 
 
 api.add_resource(UsersList, '/users')
-api.add_resource(Users, '/users/<int:user_id>')
+api.add_resource(Users, '/users/id_type/<int:user_id>')

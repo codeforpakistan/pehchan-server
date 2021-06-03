@@ -160,7 +160,7 @@ class VerifyUser(Resource):
             api.abort(404, f"User {nic} does not exist")
         
         paigham_resp = get(paigham_url+f'/auth/verify-number?recipient={user.phone}&code={code}')
-        return paigham_resp, 200
+        return paigham_resp
 
 
 class SendVerifyCode(Resource):
@@ -171,7 +171,7 @@ class SendVerifyCode(Resource):
             api.abort(404, f"User {nic} does not exist")
         
         paigham_resp = get(paigham_url+f'/auth/send-verify-code?recipient={user.phone}')
-        return paigham_resp, 200
+        return paigham_resp
 
 
 api.add_resource(UsersList, '/users')

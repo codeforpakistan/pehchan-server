@@ -16,6 +16,7 @@ from src.api.models import User
 
 # Paigham URL
 paigham_url = os.getenv('PAIGHAM_URL')
+paigham_key = os.getenv('PAIGHAM_KEY', '')
 
 
 users_blueprint = Blueprint('users', __name__)
@@ -159,7 +160,9 @@ class VerifyUser(Resource):
         if not user:
             api.abort(404, f"User {nic} does not exist")
         
-        paigham_resp = get(paigham_url+f'/auth/verify-number?recipient={user.phone}&code={code}')
+        paigham_resp = get(paigham_url+f'/auth/verify-number?recipient={user.phone}&code={code}', headers={
+            'X-API-Key': paigham_key
+        })
         return paigham_resp
 
 
@@ -170,7 +173,9 @@ class SendVerifyCode(Resource):
         if not user:
             api.abort(404, f"User {nic} does not exist")
         
-        paigham_resp = get(paigham_url+f'/auth/send-verify-code?recipient={user.phone}')
+        paigham_resp = get(paigham_url+f'/auth/send-verify-code?recipient={user.phone}', headers={
+            'X-API-Key': paigham_key
+        })
         return paigham_resp
 
 

@@ -1,3 +1,5 @@
+import os
+from requests import get, post
 from flask import Blueprint, request, jsonify
 from flask_restx import Resource, Api, fields
 from flask_jwt_extended import (
@@ -12,9 +14,13 @@ from src import db
 from src import jwt
 from src.api.models import User
 
+# Paigham URL
+paigham_url = os.getenv('PAIGHAM_URL')
+
 
 users_blueprint = Blueprint('users', __name__)
 api = Api(users_blueprint)
+
 
 # Connecting with hydra
 configuration = ory_hydra_client.Configuration(host="https://hydra-admin.pehchaan.kpgov.tech")
@@ -34,14 +40,26 @@ user = api.model('User', {
 class Users(Resource):
 
     @api.marshal_with(user)
-    def get(self, user_id):
-        user = User.query.filter_by(id=user_id).first()
+    def get(self, id_type,user_id):
+        if id_type == 'id':
+            user = User.query.filter_by(id=user_id).first()
+        elif id_type == 'nic':
+            user = User.query.filter_by(nic=user_id).first()
+        else:
+            api.abort(400, f"Invalid request")
+
         if not user:
             api.abort(404, f"User {user_id} does not exist")
         return user, 200
 
-    def delete(self, user_id):
-        user = User.query.filter_by(id=user_id).first()
+    def delete(self, id_type, user_id):
+        if id_type == 'id':
+            user = User.query.filter_by(id=user_id).first()
+        elif id_type == 'nic':
+            user = User.query.filter_by(nic=user_id).first()
+        else:
+            api.abort(400, f"Invalid request")
+        
         if not user:
             api.abort(404, f"User {user_id} does not exist")
 
@@ -59,8 +77,14 @@ class Users(Resource):
             'success': True
         }, 201
 
-    def put(self, user_id):
-        user = User.query.filter_by(id=user_id).first()
+    def put(self, id_type, user_id):
+        if id_type == 'id':
+            user = User.query.filter_by(id=user_id).first()
+        elif id_type == 'nic':
+            user = User.query.filter_by(nic=user_id).first()
+        else:
+            api.abort(400, f"Invalid request")
+        
         if not user:
             api.abort(404, f"User {user_id} does not exist")
 
@@ -127,5 +151,30 @@ class UsersList(Resource):
         return response_object, 201
 
 
+
+class VerifyUser(Resource):
+
+    def get(self, nic, code):
+        user = User.query.filter_by(nic=nic).first()
+        if not user:
+            api.abort(404, f"User {nic} does not exist")
+        
+        paigham_resp = get(paigham_url+f'/auth/verify-number?recipient={user.phone}&code={code}')
+        return paigham_resp
+
+
+class SendVerifyCode(Resource):
+
+    def get(self, nic):
+        user = User.query.filter_by(nic=nic).first()
+        if not user:
+            api.abort(404, f"User {nic} does not exist")
+        
+        paigham_resp = get(paigham_url+f'/auth/send-verify-code?recipient={user.phone}')
+        return paigham_resp
+
+
 api.add_resource(UsersList, '/users')
-api.add_resource(Users, '/users/<int:user_id>')
+api.add_resource(Users, '/users/id_type/<int:user_id>')
+api.add_resource(SendVerifyCode, '/send-verify-code/<nic>')
+api.add_resource(VerifyUser, '/verify-number/<nic>/<code>')

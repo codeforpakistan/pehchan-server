@@ -181,11 +181,11 @@ class SendVerifyCode(Resource):
 
         return {
             'success': True
-        }
+        }, 200
 
 
 
 api.add_resource(UsersList, '/users')
-api.add_resource(Users, '/users/id_type/<int:user_id>')
+api.add_resource(Users, '/users/<id_type>/<int:user_id>')
 api.add_resource(SendVerifyCode, '/send-verify-code/<nic>')
 api.add_resource(VerifyUser, '/verify-number/<nic>/<code>')

@@ -16,6 +16,8 @@ services:
       - APP_SETTINGS=src.config.DevelopmentConfig
       - DATABASE_URL=postgresql://postgres:postgres@api-db:5432/api_dev
       - DATABASE_TEST_URL=postgresql://postgres:postgres@api-db:5432/api_test
+      - PAIGHAM_URL=https://paigham.herokuapp.com
+      - PAIGHAM_KEY=60acd9c1-034f-443a-ac6c-50fdaf3a9b7a
     depends_on:
       - api-db
 

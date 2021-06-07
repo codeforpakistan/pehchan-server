@@ -181,7 +181,7 @@ class SendVerifyCode(Resource):
 
         return {
             'success': True
-        }
+        }, 200
 
 
 

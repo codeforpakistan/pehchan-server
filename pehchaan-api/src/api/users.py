@@ -164,7 +164,7 @@ class VerifyUser(Resource):
             'X-API-Key': paigham_key
         })
         return {
-            'success': True
+            'verify': paigham_resp.json().get('verify')
         }, 200
 
 
@@ -178,7 +178,11 @@ class SendVerifyCode(Resource):
         paigham_resp = get(paigham_url+f'/auth/send-verify-code?recipient={user.phone}', headers={
             'X-API-Key': paigham_key
         })
-        return paigham_resp
+
+        return {
+            'success': True
+        }
+
 
 
 api.add_resource(UsersList, '/users')

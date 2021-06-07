@@ -163,7 +163,9 @@ class VerifyUser(Resource):
         paigham_resp = get(paigham_url+f'/auth/verify-number?recipient={user.phone}&code={code}', headers={
             'X-API-Key': paigham_key
         })
-        return paigham_resp
+        return {
+            'success': True
+        }, 200
 
 
 class SendVerifyCode(Resource):

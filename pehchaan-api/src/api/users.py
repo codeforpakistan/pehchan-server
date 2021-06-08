@@ -43,7 +43,7 @@ class Users(Resource):
     @api.marshal_with(user)
     def get(self, id_type,user_id):
         if id_type == 'id':
-            user = User.query.filter_by(id=user_id).first()
+            user = User.query.filter_by(id=int(user_id)).first()
         elif id_type == 'nic':
             user = User.query.filter_by(nic=user_id).first()
         else:
@@ -55,7 +55,7 @@ class Users(Resource):
 
     def delete(self, id_type, user_id):
         if id_type == 'id':
-            user = User.query.filter_by(id=user_id).first()
+            user = User.query.filter_by(id=int(user_id)).first()
         elif id_type == 'nic':
             user = User.query.filter_by(nic=user_id).first()
         else:
@@ -80,7 +80,7 @@ class Users(Resource):
 
     def put(self, id_type, user_id):
         if id_type == 'id':
-            user = User.query.filter_by(id=user_id).first()
+            user = User.query.filter_by(id=int(user_id)).first()
         elif id_type == 'nic':
             user = User.query.filter_by(nic=user_id).first()
         else:
@@ -186,6 +186,6 @@ class SendVerifyCode(Resource):
 
 
 api.add_resource(UsersList, '/users')
-api.add_resource(Users, '/users/<id_type>/<int:user_id>')
+api.add_resource(Users, '/users/<id_type>/user_id')
 api.add_resource(SendVerifyCode, '/send-verify-code/<nic>')
 api.add_resource(VerifyUser, '/verify-number/<nic>/<code>')

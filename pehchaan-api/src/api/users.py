@@ -186,6 +186,6 @@ class SendVerifyCode(Resource):
 
 
 api.add_resource(UsersList, '/users')
-api.add_resource(Users, '/users/<id_type>/user_id')
+api.add_resource(Users, '/users/<id_type>/<user_id>')
 api.add_resource(SendVerifyCode, '/send-verify-code/<nic>')
 api.add_resource(VerifyUser, '/verify-number/<nic>/<code>')

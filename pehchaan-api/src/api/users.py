@@ -190,6 +190,7 @@ class SendVerifyCode(Resource):
 
 class UserInfo(Resource):
 
+    @api.marshal_with(user)
     def get(self):
         
         # Configure OAuth2 access token for authorization: oauth2
@@ -202,10 +203,10 @@ class UserInfo(Resource):
             api_instance = public_api.PublicApi(api_client)
             try:
                 api_response = api_instance.userinfo()
-                pprint(api_response)
-                return {
-                    'success': True,
-                }, 200
+                user = User.query.filter_by(nic=str(api_response.sub)).first()
+                if not user:
+                    api.abort(404, f"User {api_response.sub} does not exist")
+                return user, 200
             except ory_hydra_client.ApiException as e:
                 print("Exception when calling PublicApi->userinfo: %s\n" % e)
         return {

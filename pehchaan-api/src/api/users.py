@@ -1,4 +1,5 @@
 import os
+import hashlib
 from pprint import pprint
 from requests import get, post
 from flask import Blueprint, request, jsonify
@@ -98,7 +99,9 @@ class Users(Resource):
         if post_data.get('password') is None:
             api.abort(400, f"Invalid or missing password")
 
-        user.password = post_data.get('password', '')
+        # Saving hashed version of the password
+        new_password = post_data.get('password', '')
+        user.password = hashlib.md5(new_password.encode()).hexdigest()
         db.session.commit()
         return {
             'success': True
@@ -130,13 +133,15 @@ class UsersList(Resource):
         if user:
             response_object['message'] = 'Sorry. That NIC already exists.'
             return response_object, 400
-
+        
+        # saving hashed passeord
+        hashed_pasword = hashlib.md5(password.encode()).hexdigest()
         db.session.add(User(
             nic=nic,
             name=name,
             phone=phone,
             email=email,
-            password=password))
+            password=hashed_pasword))
         db.session.commit()
 
         response_object['message'] = f'{nic} was added!'

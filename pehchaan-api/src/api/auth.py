@@ -1,3 +1,4 @@
+import hashlib
 from flask import Blueprint, request, jsonify
 from flask_restx import Resource, Api, fields
 from flask_jwt_extended import (
@@ -39,7 +40,8 @@ class Auth(Resource):
         if not user:
             api.abort(404, f"User with {nic} does not exist")
 
-        if user.nic != nic or user.password != password:
+        hashed_password = hashlib.md5(password.encode()).hexdigest()
+        if user.nic != nic or user.password != hashed_password:
             return {"msg": "Bad username or password"}, 401
 
         access_token = create_access_token(identity=nic)
@@ -62,10 +64,11 @@ class Login(Resource):
         user = User.query.filter_by(nic=nic).first()
         if not user:
             api.abort(404, f"User with {nic} does not exist")
-
-        if user.nic != nic or user.password != password:
+        
+        hashed_password = hashlib.md5(password.encode()).hexdigest()
+        if user.nic != nic or user.password != hashed_password:
             return {"msg": "Bad username or password"}, 401
-
+        
         with ory_hydra_client.ApiClient(configuration) as api_client:
             hydra = ory_hydra_client.AdminApi(api_client)
             login_request = hydra.get_login_request(challenge)

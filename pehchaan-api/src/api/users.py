@@ -1,7 +1,8 @@
 import os
+from pprint import pprint
 from requests import get, post
 from flask import Blueprint, request, jsonify
-from flask_restx import Resource, Api, fields
+from flask_restx import Resource, Api, fields, Namespace
 from flask_jwt_extended import (
     JWTManager, jwt_required, create_access_token,
     get_jwt_identity
@@ -9,6 +10,7 @@ from flask_jwt_extended import (
 
 import ory_hydra_client
 from ory_hydra_client.rest import ApiException
+from ory_hydra_client.api import public_api
 
 from src import db
 from src import jwt
@@ -18,6 +20,8 @@ from src.api.models import User
 paigham_url = os.getenv('PAIGHAM_URL')
 paigham_key = os.getenv('PAIGHAM_KEY', '')
 
+
+users_namespace = Namespace("users")  # new
 
 users_blueprint = Blueprint('users', __name__)
 api = Api(users_blueprint)
@@ -184,8 +188,34 @@ class SendVerifyCode(Resource):
         }, 200
 
 
+class UserInfo(Resource):
+
+    @api.marshal_with(user)
+    def get(self):
+        
+        # Configure OAuth2 access token for authorization: oauth2
+        configuration_public = ory_hydra_client.Configuration(
+            host="https://hydra-public.pehchaan.kpgov.tech"
+        )
+        configuration_public.access_token = request.headers.get('access_token', '')
+
+        with ory_hydra_client.ApiClient(configuration_public) as api_client:
+            api_instance = public_api.PublicApi(api_client)
+            try:
+                api_response = api_instance.userinfo()
+                user = User.query.filter_by(nic=str(api_response.sub)).first()
+                if not user:
+                    api.abort(404, f"User {api_response.sub} does not exist")
+                return user, 200
+            except ory_hydra_client.ApiException as e:
+                print("Exception when calling PublicApi->userinfo: %s\n" % e)
+        return {
+            'success': False
+        }, 200
+
 
 api.add_resource(UsersList, '/users')
+api.add_resource(UserInfo, '/usersinfo')
 api.add_resource(Users, '/users/<id_type>/<user_id>')
 api.add_resource(SendVerifyCode, '/send-verify-code/<nic>')
 api.add_resource(VerifyUser, '/verify-number/<nic>/<code>')
